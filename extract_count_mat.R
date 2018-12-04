@@ -1,0 +1,5 @@
+args <- commandArgs(trailingOnly=TRUE)
+require("scater")
+require("methods")
+sce <- readRDS(args[1])
+write.table(assays(sce)[["counts"]], row.names=TRUE, col.names=TRUE, file=args[2], sep=",")
