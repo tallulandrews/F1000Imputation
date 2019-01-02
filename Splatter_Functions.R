@@ -4,7 +4,7 @@ Generate_param_table <- function() {
 	my_seeds <- round(runif(nrep*2)*10000)
 	my_seeds <- unique(my_seeds)
 	my_seeds <- my_seeds[1:nrep]
-	sim_params <- list(dropouts=c(NA, 1, 3, 5, 7),
+	sim_params <- list(dropouts=c(NA, 1, 2, 3, 4),
                    propDE=c(0.01, 0.1, 0.3),
                    method=c("groups"),
                    ngroups=c(2,5,10),
@@ -24,7 +24,7 @@ Generate_param_table <- function() {
 }
 
 # Fixed an error in this function 6 Dec 2018
-Sim_w_splatter <- function(ngenes=1000, ncells=1000, ngroups=2, seed=101, dropouts=3, propDE=0.1, method="groups") {
+Sim_w_splatter <- function(ngenes=1000, ncells=1000, ngroups=2, seed=101, dropouts=3, propDE=0.1, method="groups", nbatchs=1) {
 	require("splatter")
 	require("scater")
 	if (is.null(dropouts) | is.na(dropouts)) {
@@ -45,46 +45,13 @@ Sim_w_splatter <- function(ngenes=1000, ncells=1000, ngroups=2, seed=101, dropou
 	return(sim);
 }
 
-do_imputation_splatter <- function(splatter_sims, method=c("MAGIC", "scImpute", "DrImpute", "SAVER", "knn"), n.cores=1) {
-	require("scater")
-	source("/nfs/users/nfs_t/ta6/MAGIC/knn_smooth.R")
 
-	if (method == "scImpute") {
-		default_param=0.5;
-            	saveRDS(assays(splatter_sims)[["counts"]], file="tmp.rds");
-                scImpute::scimpute("./tmp.rds", infile="rds", outfile="rds",
-                        type="count", drop_thre=default_param, out_dir="./",
-                        Kcluster=length(unique(splatter_sims$Group)), ncores=n.cores)
-                out <- readRDS("./scimpute_count.rds")
-                return(out);
-	} else if (method == "DrImpute") {
-		default_param=0;
-                out <- DrImpute::DrImpute(assays(splatter_sims)[["logcounts"]], 
-			ks=length(unique(splatter_sims$Group)),
-                        zerop=default_param)
-                return(out);
-	} else if (method == "SAVER") {
-		# all genes default
-		out <- saver(assays(splatter_sims)[["counts"]], do.fast=TRUE, size.factor=1)
-                return(out$estimate)
-	} else if (method == "MAGIC") {
-		default_param=0;
-                out <- Rmagic::run_magic(t(assays(splatter_sims)[["counts"]]),
-                                t_diffusion=default_param, lib_size_norm=T,
-                                log_transform=F, pseudo_count=1, npca=100,
-                                k=12, ka=4, epsilon=1, rescale_percent=0)
-                return(t(out));
-	} else if (method == "knn") {
-		default_param=ncol(sim)/20;
-                out <- knn_smoothing(assays(splatter_sims)[["counts"]], k=default_param, d=10, seed=42)
-                return(out)
-        }
-}
 
-check_multiDE_accuracy_splatter <- function(sim, mat_name="logcounts", mag_centile=NULL) {
+check_multiDE_accuracy_splatter <- function(sim, mat_name="logcounts", mag_centile=NULL, norm=FALSE) {
 	require("Hmisc")
 	source("/nfs/users/nfs_t/ta6/MAGIC/CTP_Functions.R")
 	require("scater")
+	require("Matrix")
 	# Ground Truth
 	de_cols <- grep("DEFac", colnames(rowData(sim)))
 	de_tab <- rowData(sim)[,de_cols]
@@ -97,13 +64,19 @@ check_multiDE_accuracy_splatter <- function(sim, mat_name="logcounts", mag_centi
 	if (grepl("Path",sim$Group[1])){
 		sim <- sim[,sim$Step > 50] 
 	}
+	this_mat <- assays(sim)[[mat_name]]
+	if (norm) {
+		sf <- Matrix::colSums(this_mat)
+		this_mat <- t( t(this_mat)/sf*median(sf) )
+	}
+
 	# Non-parametric DE using Kruskal-Wallis test
-	p_values <- apply(assays(sim)[[mat_name]], 1, function(x) { kruskal.test(x, factor(sim$Group))$p.value})
+	p_values <- apply(this_mat, 1, function(x) { kruskal.test(x, factor(sim$Group))$p.value})
 	p_values[is.na(p_values)] <- 1;
 	# FDR multiple testing correction
 	q_values <- p.adjust(p_values, method="fdr")
 	# Observed FC
-	lvls <- my_row_mean_aggregate(assays(sim)[[mat_name]], factor(sim$Group)) # Obs mean expression by group
+	lvls <- my_row_mean_aggregate(this_mat, factor(sim$Group)) # Obs mean expression by group
 	mag <- apply(lvls, 1, max) - apply(lvls, 1, min)
 
 	# Check direction
