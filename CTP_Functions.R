@@ -13,6 +13,13 @@ my_row_mean_aggregate <- function(mat, groups) {
 
         return(result);
 }
+my_row_median_aggregate <- function(mat, groups) {
+        MAT <- as.matrix(mat)
+        x <- split(seq(ncol(MAT)), groups)
+        result <- sapply(x, function(a) apply(MAT[,a],1, median))
+
+        return(result);
+}
 
 my_row_var_aggregate <- function(mat, groups) {
         MAT <- as.matrix(mat)

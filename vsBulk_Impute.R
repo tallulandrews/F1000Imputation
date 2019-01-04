@@ -28,7 +28,6 @@ ann <- dat[,1:3]
 dat <- dat[,-c(1:3)]
 dat <- t(dat)
 colnames(dat) <- paste("Cell", 1:ncol(dat));
-dat <- dat[-grep("^ERCC_", rownames(dat)), ]
 dat <- dat[rowSums(dat > 0) > 5,]
 rownames(ann) <- colnames(dat);
 ann$Group <- ann$individual

@@ -24,9 +24,9 @@ get_TN <- function(de_list, sig_threshold=0.2) {
 	exclude <- vector()
 	genes <- vector();
 	for (DE in de_list) {
-		genes <- c(genes, DE$Gene);
+		genes <- c(genes, as.character(DE$Gene));
 		DE$q.value[is.na(DE$q.value)] <- 1
-		sig <- DE[DE$q.value < sig_thresh,]
+		sig <- DE[DE$q.value < sig_threshold,]
 		gene <- sig[,1]
 		exclude <- c(exclude, as.character(gene))
 	}
