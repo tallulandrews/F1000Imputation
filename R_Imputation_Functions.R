@@ -24,6 +24,7 @@ scImpute_wrapper<- function(sce, param=0.5, do.norm=TRUE, n.cores=16, seed=42) {
 	dir.create(tmp_dir)
 	set.seed(seed)
 	require(doParallel)
+	n.cores <- as.numeric(n.cores)
 	cl <- makeCluster(n.cores)
 	registerDoParallel(cl)
 	param_name <- "Dropout Threshold"
@@ -50,6 +51,7 @@ DrImpute_wrapper <- function(sce, param=0, do.norm=TRUE, seed=42) {
 
 SAVER_wrapper <- function(sce, param=1, do.norm=TRUE, seed=42, n.cores=16){
 	# optional CPM-like normalization
+	n.cores <- as.numeric(n.cores)
 	set.seed(seed)
 	require(doParallel)
 	cl <- makeCluster(n.cores)
