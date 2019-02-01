@@ -13,7 +13,5 @@ for (s in my_seeds) {
 	sims$counts <- sims$mat;
 	require("scater")
 	sce <- SingleCellExperiment(assays=list(counts=sims$counts), colData=data.frame(cell_truth=sims$cell_truth), rowData=data.frame(g_up=sims$g_up, g_down=sims$g_down))
-	saveRDS(sce, file=paste("vsMethodParams_seed_dca_",s,".rds", sep=""));
-	saveRDS(sce, file=paste("vsMethodParams_seed_scVI_",s,".rds", sep=""));
-	#write.table(sims$counts, row.names=TRUE, col.names=TRUE, file=paste("vsMethodParams_seed_", s, ".csv", sep=""), sep=",")
+	saveRDS(sce, file=paste("vsMethodParams_seed_",s,".rds", sep=""));
 }
