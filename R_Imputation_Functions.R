@@ -10,7 +10,7 @@
 #		random seed to ensure reproducibility (with default).
 #	output: the imputed matrix where rows=genes, cols=cells
 
-require("scater")
+require("SingleCellExperiment")
 require("Rmagic") 
 require("DrImpute") 
 require("scImpute") 
@@ -29,7 +29,7 @@ scImpute_wrapper<- function(sce, param=0.5, do.norm=TRUE, n.cores=16, seed=42) {
 	registerDoParallel(cl)
 	param_name <- "Dropout Threshold"
 	registerDoParallel(cores = n.cores)
-        saveRDS(assays(sce)[["counts"]], file=paste(tmp_dir,"tmp.rds", sep=""));
+        saveRDS(as.matrix(assays(sce)[["counts"]]), file=paste(tmp_dir,"tmp.rds", sep=""));
         scImpute::scimpute(paste(tmp_dir,"tmp.rds", sep=""), infile="rds", outfile="rds",
                 type="count", drop_thre=param, out_dir=tmp_dir,
                 Kcluster=length(unique(sce$Group)), ncores=n.cores)
@@ -43,7 +43,7 @@ DrImpute_wrapper <- function(sce, param=0, do.norm=TRUE, seed=42) {
 	# uses pre-defined log-normalized matrix
 	set.seed(seed)
 	param_name <- "Zeros Remaining"
-	out <- DrImpute::DrImpute(assays(sce)[["logcounts"]],
+	out <- DrImpute::DrImpute(as.matrix(assays(sce)[["logcounts"]]),
                   ks=length(unique(sce$Group)),
                   zerop=param)
 	return(out)
@@ -75,7 +75,7 @@ MAGIC_k_wrapper <- function(sce, param=12, do.norm=TRUE, seed=42) {
 	# optional CPM-like normalization
 	set.seed(seed)
 	param_name <- "K neighbours"
-	out <- Rmagic::run_magic(t(assays(sce)[["counts"]]), 
+	out <- Rmagic::run_magic(as.matrix(t(assays(sce)[["counts"]])), 
 		t_diffusion=3, lib_size_norm=do.norm, 
 		log_transform=F, k=param)
 	return(t(out))
@@ -85,7 +85,7 @@ MAGIC_wrapper <- function(sce, param=0, do.norm=TRUE, seed=42) {
 	# optional CPM-like normalization
 	set.seed(seed)
 	param_name <- "Diffusion time"
-	out <- Rmagic::run_magic(t(assays(sce)[["counts"]]), 
+	out <- Rmagic::run_magic(as.matrix(t(assays(sce)[["counts"]])), 
 		t_diffusion=param, lib_size_norm=do.norm, 
 		log_transform=F, k=12)
 	out <- t(out)
@@ -97,7 +97,7 @@ MAGIC_wrapper <- function(sce, param=0, do.norm=TRUE, seed=42) {
 knn_wrapper <- function(sce, param=ncol(sce)/20, do.norm=TRUE, seed=42) {
 	# includes CPM-like normalization
 	param_name <- "K neighbours"
-	out <- knn_smoothing(assays(sce)[["counts"]], k=param, d=10, seed=seed)
+	out <- knn_smoothing(as.matrix(assays(sce)[["counts"]]), k=param, d=10, seed=seed)
         return(out)
 }
 

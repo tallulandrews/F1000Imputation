@@ -73,7 +73,9 @@ for (i in 1:nrow(file_pairs)) {
 		meth <- methods[m];
 		# Get markers
 		mark_drop <- complex_markers(as.matrix(assays(drop)[[meth]]), drop$cell_type1, n_max=1) 
+		saveRDS(mark_drop, paste(tissue, meth, "10X","markers.rds", sep="_"))
 		mark_facs <- complex_markers(as.matrix(assays(facs)[[meth]]), factor(facs$cell_type1), n_max=1) 
+		saveRDS(mark_facs, paste(tissue, meth, "FACS","markers.rds", sep="_"))
 		# p-value correlation
 		tmp_facs <- mark_facs[rownames(mark_facs) %in% rownames(mark_drop),]
 		tmp_drop <- mark_drop[match(rownames(tmp_facs), rownames(mark_drop)),]
@@ -143,7 +145,7 @@ for (i in 1:nrow(file_pairs)) {
 		FACSxMethOUT[r,j] <- perc_agree2
 	}}
 
-	saveRDS(list(crossData=xDataOUT, DropxMethOUT=DropxMethOUT, FACSxMethOUT=FACSxMethOUT), file=tissue_outfile )
+#	saveRDS(list(crossData=xDataOUT, DropxMethOUT=DropxMethOUT, FACSxMethOUT=FACSxMethOUT), file=tissue_outfile )
 	allDataOUT <- rbind(allDataOUT, xDataOUT)
 	if (is.null(dim(allMethOUT))) {
 		allMethOUT <- DropxMethOUT+FACSxMethOUT
@@ -153,7 +155,7 @@ for (i in 1:nrow(file_pairs)) {
 		
 }
 allMethOUT <- allMethOUT/(nrow(file_pairs)*2)
-saveRDS(allMethOUT, file=cross_method_outfile) 
-saveRDS(allDataOUT, file=cross_dataset_outfile) 
-saveRDS(p_val_cors, file="TM_mark_cors.rds") 
+#saveRDS(allMethOUT, file=cross_method_outfile) 
+#saveRDS(allDataOUT, file=cross_dataset_outfile) 
+#saveRDS(p_val_cors, file="TM_mark_cors.rds") 
 

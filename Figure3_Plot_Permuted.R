@@ -41,8 +41,8 @@ tissue_colours <- c(brewer.pal(12, "Set3"), "#e5d8bd")
 names(tissue_colours) <- colnames(FACS_plot)
 
 par(mar=c(4.5,4,2,1))
-barplot(t(FACS_plot), beside=T, ylim=c(0,1), ylab="FPR", col=tissue_colours, las=2, main="Smartseq2")
-mtext("A", side=2, line=2.2, at=1, cex=1.5, font=2, las=2)
+barplot(t(FACS_plot), beside=T, ylim=c(0,1), ylab="FPR", col=tissue_colours, las=2, main="Smart-seq2")
+mtext("A", side=2, line=2.5, at=1, cex=1.2, font=2, las=2)
 
 
 # 10X
@@ -63,7 +63,7 @@ if (grep("logcounts", rownames(tm10X_plot))) {
 
 par(mar=c(4.5,4,2,1))
 barplot(t(tm10X_plot), beside=T, ylim=c(0,1), ylab="FPR", col=tissue_colours[match(colnames(tm10X_plot), names(tissue_colours))], las=2, main="10X")
-mtext("B", side=2, line=2.2, at=1, cex=1.5, font=2, las=2)
+mtext("B", side=2, line=2.5, at=1, cex=1.2, font=2, las=2)
 
 blank_plot <- function() {
         tmp <-  par("mar")
